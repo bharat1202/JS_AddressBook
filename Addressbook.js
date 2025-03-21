@@ -70,8 +70,8 @@ function addContactToAddressBook() {
     });
 }
 
-//  Function to search contact by city or state using `filter` and `map`
-function searchContactByLocation() {
+//  Function to view persons by city or state using `filter`, `map`, and `reduce`
+function viewPersonsByLocation() {
     rl.question("Enter the Address Book name: ", (bookName) => {
         if (!addressBooks[bookName]) {
             console.log(` Address Book '${bookName}' does not exist.`);
@@ -79,32 +79,40 @@ function searchContactByLocation() {
             return;
         }
 
-        rl.question("Search by (city/state): ", (searchType) => {
-            rl.question(`Enter the ${searchType}: `, (value) => {
-                let results = [];
+        rl.question("View by (city/state): ", (searchType) => {
+            if (searchType.toLowerCase() !== "city" && searchType.toLowerCase() !== "state") {
+                console.log(` Invalid search type. Please enter 'city' or 'state'.`);
+                showMenu();
+                return;
+            }
 
-                if (searchType.toLowerCase() === "city") {
-                    results = addressBooks[bookName].filter(contact => contact.city.toLowerCase() === value.toLowerCase());
-                } else if (searchType.toLowerCase() === "state") {
-                    results = addressBooks[bookName].filter(contact => contact.state.toLowerCase() === value.toLowerCase());
-                } else {
-                    console.log(" Invalid search type. Please enter 'city' or 'state'.");
-                    showMenu();
-                    return;
+            const groupedData = addressBooks[bookName].reduce((acc, contact) => {
+                const key = searchType === "city" ? contact.city : contact.state;
+
+                if (!acc[key]) {
+                    acc[key] = [];
                 }
 
-                if (results.length === 0) {
-                    console.log(` No contacts found in ${searchType} '${value}'.`);
-                } else {
-                    console.log(`\n Found ${results.length} contact(s) in ${searchType} '${value}':`);
-                    results.map((contact, index) => {
+                acc[key].push(contact);
+                return acc;
+            }, {});
+
+            const keys = Object.keys(groupedData);
+            if (keys.length === 0) {
+                console.log(` No contacts found in the selected ${searchType}.`);
+            } else {
+                console.log(`\n Persons grouped by ${searchType}:`);
+                keys.forEach((key) => {
+                    console.log(`\n ${key} (${groupedData[key].length} contact(s))`);
+                    groupedData[key].map((contact) => {
                         console.log(
-                            `${index + 1}. ${contact.firstName} ${contact.lastName} - ${contact.address}, ${contact.city}, ${contact.state}, ${contact.zip} - ${contact.phone} - ${contact.email}`
+                            `  - ${contact.firstName} ${contact.lastName}, ${contact.address}, ${contact.city}, ${contact.state}, ${contact.zip}, ${contact.phone}, ${contact.email}`
                         );
                     });
-                }
-                showMenu();
-            });
+                });
+            }
+
+            showMenu();
         });
     });
 }
@@ -114,7 +122,7 @@ function showMenu() {
     console.log("\n=== Address Book Menu ===");
     console.log("1. Create New Address Book");
     console.log("2. Add Contact to Address Book");
-    console.log("3. Search Contact by City/State");
+    console.log("3. View Persons by City/State");
     console.log("4. Exit");
 
     rl.question("Enter your choice: ", (choice) => {
@@ -126,12 +134,12 @@ function showMenu() {
                 addContactToAddressBook();
                 break;
             case '3':
-                searchContactByLocation(); // New Function
+                viewPersonsByLocation(); //  New Function
                 break;
             case '4':
                 console.log(" Exiting Address Book. Goodbye!");
                 rl.close();
-                break;
+                break;               
             default:
                 console.log(" Invalid choice. Please try again.");
                 showMenu();
