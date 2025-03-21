@@ -43,6 +43,19 @@ function validateContact(contact) {
     }
 }
 
+// Function to create a new Address Book
+function createAddressBook() {
+    rl.question("Enter the name of the new Address Book: ", (name) => {
+        if (addressBooks[name]) {
+            console.log(` Address Book '${name}' already exists.`);
+        } else {
+            addressBooks[name] = [];
+            console.log(` Address Book '${name}' created successfully!`);
+        }
+        showMenu(); // Return to menu
+    });
+}
+
 // Function to add a contact to a specific Address Book
 function addContactToAddressBook() {
     rl.question("Enter the Address Book name: ", (bookName) => {
@@ -95,40 +108,74 @@ function addContactToAddressBook() {
     });
 }
 
-// Function to display all contacts
-function displayContacts() {
-    console.clear();
-    if (contacts.length === 0) {
-        console.log("No contacts available.");
-    } else {
-        console.log("\n=== Address Book ===");
-        contacts.forEach((contact, index) => {
+// Function to display contacts from a specific Address Book
+function displayAddressBook() {
+    rl.question("Enter the Address Book name: ", (bookName) => {
+        if (!addressBooks[bookName]) {
+            console.log(` Address Book '${bookName}' does not exist.`);
+            showMenu();
+            return;
+        }
+
+        if (addressBooks[bookName].length === 0) {
+            console.log(`Address Book '${bookName}' is empty.`);
+            showMenu();
+            return;
+        }
+
+        console.log(`\n=== ${bookName} Address Book ===`);
+        addressBooks[bookName].forEach((contact, index) => {
             console.log(
                 `${index + 1}. ${contact.firstName} ${contact.lastName} - ` +
                 `${contact.address}, ${contact.city}, ${contact.state}, ${contact.zip} - ` +
                 `${contact.phone} - ${contact.email}`
             );
         });
+
+        showMenu();
+    });
+}
+
+// Function to display all Address Books
+function displayAllAddressBooks() {
+    console.clear();
+    const keys = Object.keys(addressBooks);
+
+    if (keys.length === 0) {
+        console.log(" No Address Books available.");
+    } else {
+        console.log("\n=== All Address Books ===");
+        keys.forEach((book, index) => {
+            console.log(`${index + 1}. ${book} (${addressBooks[book].length} contacts)`);
+        });
     }
-    showMenu(); // Return to menu after displaying
+    showMenu(); // Return to menu
 }
 
 // Function to handle menu
 function showMenu() {
     console.log("\n=== Address Book Menu ===");
-    console.log("1. Add Contact");
-    console.log("2. Display Contacts");
-    console.log("3. Exit");
+    console.log("1. Create New Address Book");
+    console.log("2. Add Contact to Address Book");
+    console.log("3. Display Contacts from Address Book");
+    console.log("4. Display All Address Books");
+    console.log("5. Exit");
 
     rl.question("Enter your choice: ", (choice) => {
         switch (choice) {
             case '1':
-                addContact();
+                createAddressBook();
                 break;
             case '2':
-                displayContacts();
+                addContactToAddressBook();
                 break;
             case '3':
+                displayAddressBook();
+                break;
+            case '4':
+                displayAllAddressBooks();
+                break;
+            case '5':
                 console.log(" Exiting Address Book. Goodbye!");
                 rl.close(); // Close the input stream
                 break;
