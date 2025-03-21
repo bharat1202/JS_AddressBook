@@ -70,21 +70,43 @@ function addContactToAddressBook() {
     });
 }
 
+//  Function to search contact by city or state using `filter` and `map`
+function searchContactByLocation() {
+    rl.question("Enter the Address Book name: ", (bookName) => {
+        if (!addressBooks[bookName]) {
+            console.log(` Address Book '${bookName}' does not exist.`);
+            showMenu();
+            return;
+        }
 
-// Function to display all Address Books
-function displayAllAddressBooks() {
-    console.clear();
-    const keys = Object.keys(addressBooks);
+        rl.question("Search by (city/state): ", (searchType) => {
+            rl.question(`Enter the ${searchType}: `, (value) => {
+                let results = [];
 
-    if (keys.length === 0) {
-        console.log(" No Address Books available.");
-    } else {
-        console.log("\n=== All Address Books ===");
-        keys.forEach((book, index) => {
-            console.log(`${index + 1}. ${book} (${addressBooks[book].length} contacts)`);
+                if (searchType.toLowerCase() === "city") {
+                    results = addressBooks[bookName].filter(contact => contact.city.toLowerCase() === value.toLowerCase());
+                } else if (searchType.toLowerCase() === "state") {
+                    results = addressBooks[bookName].filter(contact => contact.state.toLowerCase() === value.toLowerCase());
+                } else {
+                    console.log(" Invalid search type. Please enter 'city' or 'state'.");
+                    showMenu();
+                    return;
+                }
+
+                if (results.length === 0) {
+                    console.log(` No contacts found in ${searchType} '${value}'.`);
+                } else {
+                    console.log(`\n Found ${results.length} contact(s) in ${searchType} '${value}':`);
+                    results.map((contact, index) => {
+                        console.log(
+                            `${index + 1}. ${contact.firstName} ${contact.lastName} - ${contact.address}, ${contact.city}, ${contact.state}, ${contact.zip} - ${contact.phone} - ${contact.email}`
+                        );
+                    });
+                }
+                showMenu();
+            });
         });
-    }
-    showMenu();
+    });
 }
 
 // Function to display the menu
@@ -92,7 +114,7 @@ function showMenu() {
     console.log("\n=== Address Book Menu ===");
     console.log("1. Create New Address Book");
     console.log("2. Add Contact to Address Book");
-    console.log("3. Display All Address Books");
+    console.log("3. Search Contact by City/State");
     console.log("4. Exit");
 
     rl.question("Enter your choice: ", (choice) => {
@@ -104,14 +126,14 @@ function showMenu() {
                 addContactToAddressBook();
                 break;
             case '3':
-                displayAllAddressBooks();
+                searchContactByLocation(); // New Function
                 break;
             case '4':
                 console.log(" Exiting Address Book. Goodbye!");
                 rl.close();
                 break;
             default:
-                console.log("Invalid choice. Please try again.");
+                console.log(" Invalid choice. Please try again.");
                 showMenu();
         }
     });
