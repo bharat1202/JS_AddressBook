@@ -70,8 +70,8 @@ function addContactToAddressBook() {
     });
 }
 
-//  Function to view persons by city or state using `filter`, `map`, and `reduce`
-function viewPersonsByLocation() {
+//  Function to count contacts by city and state using `reduce`
+function countContactsByLocation() {
     rl.question("Enter the Address Book name: ", (bookName) => {
         if (!addressBooks[bookName]) {
             console.log(` Address Book '${bookName}' does not exist.`);
@@ -79,41 +79,31 @@ function viewPersonsByLocation() {
             return;
         }
 
-        rl.question("View by (city/state): ", (searchType) => {
-            if (searchType.toLowerCase() !== "city" && searchType.toLowerCase() !== "state") {
-                console.log(` Invalid search type. Please enter 'city' or 'state'.`);
-                showMenu();
-                return;
-            }
+        //  Count by city
+        const cityCount = addressBooks[bookName].reduce((acc, contact) => {
+            acc[contact.city] = (acc[contact.city] || 0) + 1;
+            return acc;
+        }, {});
 
-            const groupedData = addressBooks[bookName].reduce((acc, contact) => {
-                const key = searchType === "city" ? contact.city : contact.state;
+        //  Count by state
+        const stateCount = addressBooks[bookName].reduce((acc, contact) => {
+            acc[contact.state] = (acc[contact.state] || 0) + 1;
+            return acc;
+        }, {});
 
-                if (!acc[key]) {
-                    acc[key] = [];
-                }
-
-                acc[key].push(contact);
-                return acc;
-            }, {});
-
-            const keys = Object.keys(groupedData);
-            if (keys.length === 0) {
-                console.log(` No contacts found in the selected ${searchType}.`);
-            } else {
-                console.log(`\n Persons grouped by ${searchType}:`);
-                keys.forEach((key) => {
-                    console.log(`\n ${key} (${groupedData[key].length} contact(s))`);
-                    groupedData[key].map((contact) => {
-                        console.log(
-                            `  - ${contact.firstName} ${contact.lastName}, ${contact.address}, ${contact.city}, ${contact.state}, ${contact.zip}, ${contact.phone}, ${contact.email}`
-                        );
-                    });
-                });
-            }
-
-            showMenu();
+        // Display count by city
+        console.log("\n Number of contacts by City:");
+        Object.keys(cityCount).forEach(city => {
+            console.log(`${city}: ${cityCount[city]}`);
         });
+
+        //  Display count by state
+        console.log("\n Number of contacts by State:");
+        Object.keys(stateCount).forEach(state => {
+            console.log(` ${state}: ${stateCount[state]}`);
+        });
+
+        showMenu();
     });
 }
 
@@ -122,7 +112,7 @@ function showMenu() {
     console.log("\n=== Address Book Menu ===");
     console.log("1. Create New Address Book");
     console.log("2. Add Contact to Address Book");
-    console.log("3. View Persons by City/State");
+    console.log("3. Count Contacts by City/State"); 
     console.log("4. Exit");
 
     rl.question("Enter your choice: ", (choice) => {
@@ -134,14 +124,14 @@ function showMenu() {
                 addContactToAddressBook();
                 break;
             case '3':
-                viewPersonsByLocation(); //  New Function
+                countContactsByLocation(); 
                 break;
             case '4':
-                console.log(" Exiting Address Book. Goodbye!");
+                console.log("Exiting Address Book. Goodbye!");
                 rl.close();
-                break;               
+                break;
             default:
-                console.log(" Invalid choice. Please try again.");
+                console.log("Invalid choice. Please try again.");
                 showMenu();
         }
     });
