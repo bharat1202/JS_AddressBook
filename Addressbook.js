@@ -108,8 +108,8 @@ function addContactToAddressBook() {
     });
 }
 
-// Function to display contacts from a specific Address Book
-function displayAddressBook() {
+// Function to find and edit a contact
+function editContact() {
     rl.question("Enter the Address Book name: ", (bookName) => {
         if (!addressBooks[bookName]) {
             console.log(` Address Book '${bookName}' does not exist.`);
@@ -117,49 +117,71 @@ function displayAddressBook() {
             return;
         }
 
-        if (addressBooks[bookName].length === 0) {
-            console.log(`Address Book '${bookName}' is empty.`);
-            showMenu();
-            return;
-        }
+        rl.question("Enter First Name of the contact: ", (firstName) => {
+            rl.question("Enter Last Name of the contact: ", (lastName) => {
+                const contact = addressBooks[bookName].find(
+                    c => c.firstName === firstName && c.lastName === lastName
+                );
 
-        console.log(`\n=== ${bookName} Address Book ===`);
-        addressBooks[bookName].forEach((contact, index) => {
-            console.log(
-                `${index + 1}. ${contact.firstName} ${contact.lastName} - ` +
-                `${contact.address}, ${contact.city}, ${contact.state}, ${contact.zip} - ` +
-                `${contact.phone} - ${contact.email}`
-            );
+                if (!contact) {
+                    console.log(` Contact '${firstName} ${lastName}' not found in '${bookName}'.`);
+                    showMenu();
+                    return;
+                }
+
+                console.log("\nEditing Contact (Leave blank to keep existing value):");
+                
+                rl.question(`Enter New First Name (${contact.firstName}): `, (newFirstName) => {
+                    rl.question(`Enter New Last Name (${contact.lastName}): `, (newLastName) => {
+                        rl.question(`Enter New Address (${contact.address}): `, (newAddress) => {
+                            rl.question(`Enter New City (${contact.city}): `, (newCity) => {
+                                rl.question(`Enter New State (${contact.state}): `, (newState) => {
+                                    rl.question(`Enter New Zip (${contact.zip}): `, (newZip) => {
+                                        rl.question(`Enter New Phone (${contact.phone}): `, (newPhone) => {
+                                            rl.question(`Enter New Email (${contact.email}): `, (newEmail) => {
+                                                try {
+                                                    const updatedContact = {
+                                                        firstName: newFirstName || contact.firstName,
+                                                        lastName: newLastName || contact.lastName,
+                                                        address: newAddress || contact.address,
+                                                        city: newCity || contact.city,
+                                                        state: newState || contact.state,
+                                                        zip: newZip || contact.zip,
+                                                        phone: newPhone || contact.phone,
+                                                        email: newEmail || contact.email
+                                                    };
+
+                                                    // Validate updated contact
+                                                    validateContact(updatedContact);
+
+                                                    // Update contact
+                                                    Object.assign(contact, updatedContact);
+                                                    console.log(`Contact '${firstName} ${lastName}' updated successfully!`);
+                                                } catch (error) {
+                                                    console.error(`\n Error: ${error.message}`);
+                                                }
+
+                                                showMenu(); // Return to menu
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
         });
-
-        showMenu();
     });
 }
 
-// Function to display all Address Books
-function displayAllAddressBooks() {
-    console.clear();
-    const keys = Object.keys(addressBooks);
-
-    if (keys.length === 0) {
-        console.log(" No Address Books available.");
-    } else {
-        console.log("\n=== All Address Books ===");
-        keys.forEach((book, index) => {
-            console.log(`${index + 1}. ${book} (${addressBooks[book].length} contacts)`);
-        });
-    }
-    showMenu(); // Return to menu
-}
-
-// Function to handle menu
+// Function to display the menu
 function showMenu() {
     console.log("\n=== Address Book Menu ===");
     console.log("1. Create New Address Book");
     console.log("2. Add Contact to Address Book");
-    console.log("3. Display Contacts from Address Book");
-    console.log("4. Display All Address Books");
-    console.log("5. Exit");
+    console.log("3. Edit Contact");
+    console.log("4. Exit");
 
     rl.question("Enter your choice: ", (choice) => {
         switch (choice) {
@@ -170,17 +192,14 @@ function showMenu() {
                 addContactToAddressBook();
                 break;
             case '3':
-                displayAddressBook();
+                editContact();
                 break;
             case '4':
-                displayAllAddressBooks();
-                break;
-            case '5':
-                console.log(" Exiting Address Book. Goodbye!");
+                console.log("👋 Exiting Address Book. Goodbye!");
                 rl.close(); // Close the input stream
                 break;
             default:
-                console.log(" Invalid choice. Please try again.");
+                console.log("❌ Invalid choice. Please try again.");
                 showMenu(); // Retry if input is invalid
         }
     });
