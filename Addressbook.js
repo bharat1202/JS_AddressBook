@@ -108,8 +108,8 @@ function addContactToAddressBook() {
     });
 }
 
-// Function to delete a contact from an Address Book
-function deleteContact() {
+// Function to find the number of contacts using `reduce`
+function countContacts() {
     rl.question("Enter the Address Book name: ", (bookName) => {
         if (!addressBooks[bookName]) {
             console.log(` Address Book '${bookName}' does not exist.`);
@@ -117,32 +117,9 @@ function deleteContact() {
             return;
         }
 
-        rl.question("Enter First Name of the contact: ", (firstName) => {
-            rl.question("Enter Last Name of the contact: ", (lastName) => {
-                const index = addressBooks[bookName].findIndex(
-                    contact => contact.firstName === firstName && contact.lastName === lastName
-                );
-
-                if (index === -1) {
-                    console.log(` Contact '${firstName} ${lastName}' not found in '${bookName}'.`);
-                    showMenu();
-                    return;
-                }
-
-                console.log(`\n Contact Found:`);
-                console.log(`${firstName} ${lastName} - ${addressBooks[bookName][index].address}, ${addressBooks[bookName][index].city}, ${addressBooks[bookName][index].state}, ${addressBooks[bookName][index].zip} - ${addressBooks[bookName][index].phone} - ${addressBooks[bookName][index].email}`);
-                
-                rl.question("\nAre you sure you want to delete this contact? (yes/no): ", (confirmation) => {
-                    if (confirmation.toLowerCase() === 'yes') {
-                        addressBooks[bookName].splice(index, 1);
-                        console.log(` Contact '${firstName} ${lastName}' deleted successfully from '${bookName}'!`);
-                    } else {
-                        console.log("Deletion cancelled.");
-                    }
-                    showMenu();
-                });
-            });
-        });
+        const totalContacts = addressBooks[bookName].reduce((count) => count + 1, 0);
+        console.log(` Total number of contacts in '${bookName}': ${totalContacts}`);
+        showMenu();
     });
 }
 
@@ -168,8 +145,9 @@ function showMenu() {
     console.log("1. Create New Address Book");
     console.log("2. Add Contact to Address Book");
     console.log("3. Delete Contact");
-    console.log("4. Display All Address Books");
-    console.log("5. Exit");
+    console.log("4. Count Contacts in Address Book");
+    console.log("5. Display All Address Books");
+    console.log("6. Exit");
 
     rl.question("Enter your choice: ", (choice) => {
         switch (choice) {
@@ -183,9 +161,12 @@ function showMenu() {
                 deleteContact();
                 break;
             case '4':
-                displayAllAddressBooks();
+                countContacts(); // New function
                 break;
             case '5':
+                displayAllAddressBooks();
+                break;
+            case '6':
                 console.log(" Exiting Address Book. Goodbye!");
                 rl.close();
                 break;
