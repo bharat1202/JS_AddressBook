@@ -5,33 +5,86 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-// Address Book Array
-const contacts = [];
+// Object to hold multiple Address Books
+const addressBooks = {};
 
-// Function to add a contact
-function addContact() {
-    rl.question("Enter First Name: ", (firstName) => {
-        rl.question("Enter Last Name: ", (lastName) => {
-            rl.question("Enter Address: ", (address) => {
-                rl.question("Enter City: ", (city) => {
-                    rl.question("Enter State: ", (state) => {
-                        rl.question("Enter Zip: ", (zip) => {
-                            rl.question("Enter Phone Number: ", (phone) => {
-                                rl.question("Enter Email: ", (email) => {
-                                    const contact = {
-                                        firstName,
-                                        lastName,
-                                        address,
-                                        city,
-                                        state,
-                                        zip,
-                                        phone,
-                                        email
-                                    };
+// Validation patterns
+const namePattern = /^[A-Z][a-zA-Z]{2,}$/;
+const addressPattern = /^.{4,}$/;
+const zipPattern = /^\d{5}$/;
+const phonePattern = /^\d{10}$/;
+const emailPattern = /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/;
 
-                                    contacts.push(contact);
-                                    console.log(" Contact Added Successfully!");
-                                    showMenu(); // Return to menu after adding
+// Function to validate contact fields
+function validateContact(contact) {
+    if (!namePattern.test(contact.firstName)) {
+        throw new Error(" Invalid First Name: Should start with a capital letter and have at least 3 characters.");
+    }
+    if (!namePattern.test(contact.lastName)) {
+        throw new Error(" Invalid Last Name: Should start with a capital letter and have at least 3 characters.");
+    }
+    if (!addressPattern.test(contact.address)) {
+        throw new Error(" Invalid Address: Minimum 4 characters required.");
+    }
+    if (!addressPattern.test(contact.city)) {
+        throw new Error(" Invalid City: Minimum 4 characters required.");
+    }
+    if (!addressPattern.test(contact.state)) {
+        throw new Error(" Invalid State: Minimum 4 characters required.");
+    }
+    if (!zipPattern.test(contact.zip)) {
+        throw new Error(" Invalid Zip: Must be a 5-digit number.");
+    }
+    if (!phonePattern.test(contact.phone)) {
+        throw new Error(" Invalid Phone: Must be a 10-digit number.");
+    }
+    if (!emailPattern.test(contact.email)) {
+        throw new Error(" Invalid Email: Must follow standard email format (e.g., example@domain.com).");
+    }
+}
+
+// Function to add a contact to a specific Address Book
+function addContactToAddressBook() {
+    rl.question("Enter the Address Book name: ", (bookName) => {
+        if (!addressBooks[bookName]) {
+            console.log(` Address Book '${bookName}' does not exist.`);
+            showMenu();
+            return;
+        }
+
+        rl.question("Enter First Name: ", (firstName) => {
+            rl.question("Enter Last Name: ", (lastName) => {
+                rl.question("Enter Address: ", (address) => {
+                    rl.question("Enter City: ", (city) => {
+                        rl.question("Enter State: ", (state) => {
+                            rl.question("Enter Zip: ", (zip) => {
+                                rl.question("Enter Phone Number: ", (phone) => {
+                                    rl.question("Enter Email: ", (email) => {
+                                        try {
+                                            const contact = {
+                                                firstName,
+                                                lastName,
+                                                address,
+                                                city,
+                                                state,
+                                                zip,
+                                                phone,
+                                                email
+                                            };
+
+                                            // Validate the contact data
+                                            validateContact(contact);
+
+                                            // Add to specific address book if valid
+                                            addressBooks[bookName].push(contact);
+                                            console.log(` Contact added to '${bookName}' successfully!`);
+                                        } catch (error) {
+                                            console.error(`\n Error: ${error.message}`);
+                                        }
+
+                                        // Return to menu after adding
+                                        showMenu();
+                                    });
                                 });
                             });
                         });
